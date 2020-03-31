@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  node0:
+    container_name: besu-bootnode
+    image: "gcr.io/whiteblock/besu:keccak256"
+    ports:
+      - "30303:30303"
+      - "30303:30303/udp"
+      - "8545:8545"
+    volumes:
+      - ./:/opt/besu/config:Z
+    entrypoint: >
+      bash -c "/opt/besu/bin/besu --genesis-file=config/new-testnet-genesis.json
+      --p2p-host=0.0.0.0
+      --p2p-port=30303
+      --rpc-http-api=ADMIN,ETH,NET,WEB3,CLIQUE,IBFT,PERM,DEBUG,MINER,EEA,PRIV,PLUGINS
+      --data-path=/tmp/dataDir 
+      --node-private-key-file=config/bootnode.key
+      --logging=TRACE 
+      --rpc-http-enabled 
+      --rpc-http-host=0.0.0.0 
+      --host-whitelist='*' "
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.2
+
+  node1:
+    container_name: besu-miner0
+    image: "gcr.io/whiteblock/besu:keccak256"
+    ports:
+      - "0.0.0.0:30201:30201"
+    expose:
+      - "8545"
+      - "30201"
+    volumes:
+      - ./:/opt/besu/config:Z
+    entrypoint: >
+      bash -c "/opt/besu/bin/besu --genesis-file=config/new-testnet-genesis.json
+      --miner-enabled
+      --miner-coinbase=0xb32bbe0883f8062497acc738ebb2f71e656db135 
+      --p2p-host=0.0.0.0
+      --p2p-port=30201
+      --data-path=/tmp/dataDir 
+      --node-private-key-file="config/miner0.key"
+      --logging=TRACE
+      --rpc-http-api=ADMIN,ETH,NET,WEB3,CLIQUE,IBFT,PERM,DEBUG,MINER,EEA,PRIV,PLUGINS
+      --bootnodes=enode://2eea5409afa0ef7a211d17fbfec4dfc09db9b37600ce953e62b6b38db151c12a902f56501b58c3b980506a0e1a56cb5675365c99f228fa092382bce7d1e4d154@192.167.10.2:30303
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --host-whitelist='*' "
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.3
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      -
+        subnet: 192.167.10.0/16
