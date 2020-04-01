@@ -10,13 +10,13 @@ how to connect to the testnet or start your own!
     git clone https://github.com/whiteblock/keccak-besu-testnet.git
     cd keccak-besu-testnet
  
-### Connect to the Testnet using a Docker Container
+### Connect to the Whiteblock Testnet using a Docker Container
 
-To connect to the Whiteblock testnet without mining:
+To connect to the testnet without mining:
 
     make connect-testnet
 
-To connect to the Whiteblock testnet as a miner:
+To connect to the testnet as a miner:
 
     make connect-testnet-as-miner
 
@@ -48,4 +48,24 @@ off mining.
         --rpc-http-enabled  \
         --rpc-http-host=0.0.0.0  \
         --host-whitelist='*'  
-        
+
+### Connect to the Whiteblock Testnet by Building Besu from Source
+
+To begin, consult with the Hyperledger Besu documentation and wiki pages to
+install dependencies and build the official Besu client from source. Then,
+build and run the modified client with Keccak256 mining. 
+
+    git clone https://github.com/whiteblock/besu.git
+    cd besu/
+    git checkout develop
+    # Make a copy of the keccak256genesis.json file in this repository over to
+    # the top level of the modified besu repository. Then, in the besu/ directory
+    ./gradlew installDist
+    ./build/install/besu/bin/besu --genesis-file=keccak256genesis.json \
+        --p2p-host=0.0.0.0 \
+        --p2p-port=30303 \
+        --data-path=/tmp/tmpDataDir --logging=TRACE \
+        --bootnodes=enode://7b377874e6639232f7967fe47df79dc653a24f13e117a0ea9f005e031183e974615ae5546d5818e593249713d730a4aa84438204378397f3d5f438ee268faa81@34.70.120.1:30303 \
+        --rpc-http-enabled \
+        --rpc-http-host=0.0.0.0 \
+        --host-whitelist='*'
